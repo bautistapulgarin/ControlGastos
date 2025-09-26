@@ -21,8 +21,8 @@ creds = Credentials.from_service_account_info(
 
 client = gspread.authorize(creds)
 
-# Cambia por la URL de tu hoja de Google Sheets
-SHEET_URL = "https://docs.google.com/spreadsheets/d/XXXXXXXXXXXX/edit"
+# URL de tu hoja de Google Sheets
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1Rh8IwUAV9o2jKYD-SwxmMcYty9n0YllOTW1E3gWr-iA/edit"
 sheet = client.open_by_url(SHEET_URL).sheet1
 
 # ==============================
@@ -47,7 +47,11 @@ with col2:
 registros = sheet.get_all_values()
 
 if registros:
-    df = pd.DataFrame(registros[1:], columns=registros[0]) if len(registros) > 1 else pd.DataFrame(registros)
+    # Si la hoja tiene encabezado, usamos la primera fila como columnas
+    if len(registros) > 1:
+        df = pd.DataFrame(registros[1:], columns=registros[0])
+    else:
+        df = pd.DataFrame(registros, columns=["Gasto"])
     st.subheader("📊 Historial de registros")
     st.dataframe(df, use_container_width=True)
 else:
