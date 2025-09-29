@@ -2,14 +2,14 @@ import streamlit as st
 from supabase import create_client, Client
 
 # ===============================
-# Configuración desde secrets.toml
+# Configuración segura desde Secrets
 # ===============================
 SUPABASE_URL = st.secrets["supabase"]["url"]
 SUPABASE_KEY = st.secrets["supabase"]["key"]
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-st.title("✅ App de prueba con Supabase")
+st.title("✅ App de prueba con Supabase (Streamlit Cloud)")
 
 # ===============================
 # Insertar datos
