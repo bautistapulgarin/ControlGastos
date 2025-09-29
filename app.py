@@ -2,10 +2,10 @@ import streamlit as st
 from supabase import create_client, Client
 
 # ===============================
-# Configuración de Supabase
+# Configuración desde secrets.toml
 # ===============================
-SUPABASE_URL = "https://TU_URL.supabase.co"   # 👈 pon aquí tu URL
-SUPABASE_KEY = "TU_API_KEY"                   # 👈 pon aquí tu API KEY
+SUPABASE_URL = st.secrets["supabase"]["url"]
+SUPABASE_KEY = st.secrets["supabase"]["key"]
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
