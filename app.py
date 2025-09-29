@@ -1,41 +1,39 @@
 import streamlit as st
 from supabase import create_client, Client
 
-# ==============================
-# CONFIGURACIÓN DE SUPABASE (usa secrets en Streamlit)
-# ==============================
-SUPABASE_URL = st.secrets["SUPABASE_URL"]
-SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+# ----------------------------
+# Configuración Supabase
+# ----------------------------
+SUPABASE_URL = st.secrets["supabase"]["url"]
+SUPABASE_KEY = st.secrets["supabase"]["key"]
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# ==============================
-# INTERFAZ EN STREAMLIT
-# ==============================
-st.title("📊 Control de Gastos - Personas")
+# ----------------------------
+# UI Streamlit
+# ----------------------------
+st.title("Prueba con Supabase 🚀")
 
-with st.form("formulario_personas"):
-    nombre = st.text_input("Nombre")
-    edad = st.number_input("Edad", min_value=1, max_value=120, step=1)
-    submit = st.form_submit_button("Guardar en Supabase")
+nombre = st.text_input("Nombre")
+edad = st.number_input("Edad", min_value=0, step=1)
 
-# ==============================
-# INSERCIÓN EN TABLA
-# ==============================
-if submit:
+if st.button("Guardar en Supabase"):
     try:
-        data = {
-            "nombre": nombre,
-            "edad": int(edad)
-        }
-        
-        response = supabase.table("personas").insert(data).execute()
-
-        if hasattr(response, "data") and response.data:
-            st.success("✅ Registro guardado correctamente")
-            st.json(response.data)
+        data = {"nombre": nombre, "edad": edad}
+        response = supabase.table("personas").insert([data]).execute()
+        if response.data:
+            st.success("✅ Registro guardado en Supabase")
         else:
-            st.warning("⚠️ No se insertó ningún dato. Revisa los valores.")
-
+            st.error(f"❌ Error al insertar: {response}")
     except Exception as e:
-        st.error(f"❌ Error al insertar en Supabase: {str(e)}")
+        st.error(f"❌ Error al insertar en Supabase: {e}")
+
+if st.button("Leer registros"):
+    try:
+        response = supabase.table("personas").select("*").execute()
+        if response.data:
+            st.write(response.data)
+        else:
+            st.warning("⚠️ No hay datos todavía.")
+    except Exception as e:
+        st.error(f"❌ Error al leer datos: {e}")
