@@ -1,13 +1,11 @@
 import streamlit as st
 from supabase import create_client, Client
-import os
 
 # ==============================
-# CONFIGURACIÓN DE SUPABASE
+# CONFIGURACIÓN DE SUPABASE (usa secrets en Streamlit)
 # ==============================
-# Usa variables de entorno (más seguro en producción)
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://tu-proyecto.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "tu-api-key")
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -19,7 +17,6 @@ st.title("📊 Control de Gastos - Personas")
 with st.form("formulario_personas"):
     nombre = st.text_input("Nombre")
     edad = st.number_input("Edad", min_value=1, max_value=120, step=1)
-    correo = st.text_input("Correo")
     submit = st.form_submit_button("Guardar en Supabase")
 
 # ==============================
@@ -29,8 +26,7 @@ if submit:
     try:
         data = {
             "nombre": nombre,
-            "edad": int(edad),
-            "correo": correo
+            "edad": int(edad)
         }
         
         response = supabase.table("personas").insert(data).execute()
