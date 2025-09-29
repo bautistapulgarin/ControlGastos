@@ -19,7 +19,7 @@ edad = st.number_input("Edad", min_value=0, step=1)
 
 if st.button("Guardar en Supabase"):
     data = {"nombre": nombre, "edad": edad}
-    response = supabase.table("personas").insert(data).execute()
+    response = supabase.table("personas").insert([data]).execute()  # 👈 aquí la corrección
     if response.data:
         st.success("✅ Registro guardado en Supabase")
     else:
