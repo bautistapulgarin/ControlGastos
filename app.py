@@ -1,58 +1,33 @@
 import streamlit as st
-import gspread
-from google.oauth2.service_account import Credentials
-import pandas as pd
+from supabase import create_client
 
-st.set_page_config(page_title="Control de Gastos", layout="wide")
-st.title("💰 Control de Gastos")
+# ----------------------------
+# Configuración Supabase
+# ----------------------------
+SUPABASE_URL = st.secrets["supabase"]["url"]
+SUPABASE_KEY = st.secrets["supabase"]["key"]
 
-# ==============================
-# 1. Conectar con Google Sheets
-# ==============================
-scope = [
-    "https://spreadsheets.google.com/feeds",
-    "https://www.googleapis.com/auth/drive"
-]
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-creds = Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"],
-    scopes=scope
-)
+# ----------------------------
+# UI Streamlit
+# ----------------------------
+st.title("Prueba con Supabase 🚀")
 
-client = gspread.authorize(creds)
+nombre = st.text_input("Nombre")
+edad = st.number_input("Edad", min_value=0, step=1)
 
-# URL de tu hoja de Google Sheets
-SHEET_URL = "https://docs.google.com/spreadsheets/d/1Rh8IwUAV9o2jKYD-SwxmMcYty9n0YllOTW1E3gWr-iA/edit"
-sheet = client.open_by_url(SHEET_URL).sheet1
-
-# ==============================
-# 2. Entrada de datos
-# ==============================
-col1, col2 = st.columns([3, 1])
-
-with col1:
-    dato = st.text_input("✍️ Ingrese el gasto o dato:")
-
-with col2:
-    if st.button("Guardar"):
-        if dato.strip():
-            sheet.append_row([dato])
-            st.success("✅ Registro guardado correctamente")
-        else:
-            st.warning("⚠️ Escriba un dato antes de guardar")
-
-# ==============================
-# 3. Mostrar historial
-# ==============================
-registros = sheet.get_all_values()
-
-if registros:
-    # Si la hoja tiene encabezado, usamos la primera fila como columnas
-    if len(registros) > 1:
-        df = pd.DataFrame(registros[1:], columns=registros[0])
+if st.button("Guardar en Supabase"):
+    data = {"nombre": nombre, "edad": edad}
+    response = supabase.table("personas").insert(data).execute()
+    if response.data:
+        st.success("✅ Registro guardado en Supabase")
     else:
-        df = pd.DataFrame(registros, columns=["Gasto"])
-    st.subheader("📊 Historial de registros")
-    st.dataframe(df, use_container_width=True)
-else:
-    st.info("No hay registros aún.")
+        st.error(f"❌ Error: {response}")
+
+if st.button("Leer registros"):
+    response = supabase.table("personas").select("*").execute()
+    if response.data:
+        st.write(response.data)
+    else:
+        st.warning("No hay datos todavía.")
