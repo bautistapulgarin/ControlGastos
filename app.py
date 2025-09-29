@@ -1,33 +1,45 @@
 import streamlit as st
-from supabase import create_client
+from supabase import create_client, Client
+import os
 
-# ----------------------------
-# Configuración Supabase
-# ----------------------------
-SUPABASE_URL = st.secrets["supabase"]["url"]
-SUPABASE_KEY = st.secrets["supabase"]["key"]
+# ==============================
+# CONFIGURACIÓN DE SUPABASE
+# ==============================
+# Usa variables de entorno (más seguro en producción)
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://tu-proyecto.supabase.co")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "tu-api-key")
 
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# ----------------------------
-# UI Streamlit
-# ----------------------------
-st.title("Prueba con Supabase 🚀")
+# ==============================
+# INTERFAZ EN STREAMLIT
+# ==============================
+st.title("📊 Control de Gastos - Personas")
 
-nombre = st.text_input("Nombre")
-edad = st.number_input("Edad", min_value=0, step=1)
+with st.form("formulario_personas"):
+    nombre = st.text_input("Nombre")
+    edad = st.number_input("Edad", min_value=1, max_value=120, step=1)
+    correo = st.text_input("Correo")
+    submit = st.form_submit_button("Guardar en Supabase")
 
-if st.button("Guardar en Supabase"):
-    data = {"nombre": nombre, "edad": edad}
-    response = supabase.table("personas").insert([data]).execute()  # 👈 aquí la corrección
-    if response.data:
-        st.success("✅ Registro guardado en Supabase")
-    else:
-        st.error(f"❌ Error: {response}")
+# ==============================
+# INSERCIÓN EN TABLA
+# ==============================
+if submit:
+    try:
+        data = {
+            "nombre": nombre,
+            "edad": int(edad),
+            "correo": correo
+        }
+        
+        response = supabase.table("personas").insert(data).execute()
 
-if st.button("Leer registros"):
-    response = supabase.table("personas").select("*").execute()
-    if response.data:
-        st.write(response.data)
-    else:
-        st.warning("⚠️ No hay datos todavía.")
+        if hasattr(response, "data") and response.data:
+            st.success("✅ Registro guardado correctamente")
+            st.json(response.data)
+        else:
+            st.warning("⚠️ No se insertó ningún dato. Revisa los valores.")
+
+    except Exception as e:
+        st.error(f"❌ Error al insertar en Supabase: {str(e)}")
