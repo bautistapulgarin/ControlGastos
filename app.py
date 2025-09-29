@@ -4,8 +4,8 @@ from supabase import create_client
 # ----------------------------
 # Configuración Supabase
 # ----------------------------
-SUPABASE_URL = st.secrets["supabase"]["url"]
-SUPABASE_KEY = st.secrets["supabase"]["key"]
+SUPABASE_URL = st.secrets["supabase"]["https://esylrswnfmjeoivxtmsp.supabase.co"]
+SUPABASE_KEY = st.secrets["supabase"]["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzeWxyc3duZm1qZW9pdnh0bXNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxNzQ0NjgsImV4cCI6MjA3NDc1MDQ2OH0.oWqMpRJKqVOLw4n8byd5rv_k-dKfxynhGghrKCgcDGk"]
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
