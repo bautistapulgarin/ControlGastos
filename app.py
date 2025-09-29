@@ -1,39 +1,33 @@
 import streamlit as st
-from supabase import create_client, Client
+from supabase import create_client
 
-# ===============================
-# Configuración segura desde Secrets
-# ===============================
+# ----------------------------
+# Configuración Supabase
+# ----------------------------
 SUPABASE_URL = st.secrets["supabase"]["url"]
 SUPABASE_KEY = st.secrets["supabase"]["key"]
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-st.title("✅ App de prueba con Supabase (Streamlit Cloud)")
+# ----------------------------
+# UI Streamlit
+# ----------------------------
+st.title("Prueba con Supabase 🚀")
 
-# ===============================
-# Insertar datos
-# ===============================
-st.subheader("Insertar un registro")
+nombre = st.text_input("Nombre")
+edad = st.number_input("Edad", min_value=0, step=1)
 
-name = st.text_input("Nombre")
 if st.button("Guardar en Supabase"):
-    if name.strip() != "":
-        try:
-            response = supabase.table("test").insert({"name": name}).execute()
-            st.success(f"Registro insertado: {response.data}")
-        except Exception as e:
-            st.error(f"Error: {e}")
+    data = {"nombre": nombre, "edad": edad}
+    response = supabase.table("personas").insert(data).execute()
+    if response.data:
+        st.success("✅ Registro guardado en Supabase")
     else:
-        st.warning("Escribe un nombre antes de guardar.")
+        st.error(f"❌ Error: {response}")
 
-# ===============================
-# Leer datos
-# ===============================
-st.subheader("Ver registros guardados")
-if st.button("Cargar datos"):
-    try:
-        response = supabase.table("test").select("*").execute()
+if st.button("Leer registros"):
+    response = supabase.table("personas").select("*").execute()
+    if response.data:
         st.write(response.data)
-    except Exception as e:
-        st.error(f"Error: {e}")
+    else:
+        st.warning("⚠️ No hay datos todavía.")
