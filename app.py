@@ -3,14 +3,14 @@ from supabase import create_client
 from datetime import date
 
 # ----------------------------
-# Configuración Supabase
+# Conexión Supabase
 # ----------------------------
 SUPABASE_URL = st.secrets["supabase"]["url"]
 SUPABASE_KEY = st.secrets["supabase"]["key"]
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ----------------------------
-# Diccionario de categorías y subcategorías
+# Categorías y Subcategorías
 # ----------------------------
 categorias = {
     "Alimentación": [
@@ -77,7 +77,7 @@ categorias = {
         "Ahorro para metas específicas (vacaciones, educación, compra de vehículo)",
         "Seguros de vida / seguros patrimoniales"
     ],
-    "Otros": [
+    "Otros posibles campos / categorías especiales": [
         "Mascotas: comida, veterinario, juguetes, cuidado",
         "Regalos / donaciones: cumpleaños, navidad, eventos sociales",
         "Hogar: muebles, electrodomésticos, mantenimiento, reparaciones",
@@ -102,16 +102,23 @@ categorias = {
 }
 
 # ----------------------------
-# Interfaz Streamlit
+# Título
 # ----------------------------
 st.title("Registro de Gastos - Supabase 🚀")
 
+# ----------------------------
+# Selección dinámica de Categoría y Subcategoría
+# ----------------------------
+categoria = st.selectbox("Categoría", sorted(categorias.keys()), key="categoria")
+subcategoria = st.selectbox("Subcategoría", categorias[categoria], key="subcategoria")
+
+# ----------------------------
+# Formulario principal
+# ----------------------------
 with st.form("form_registro"):
     fecha = st.date_input("Fecha", value=date.today())
     tipo = st.selectbox("Tipo", ["Ingreso", "Egreso"])
     monto = st.number_input("Monto", min_value=0.0, step=0.01)
-    categoria = st.selectbox("Categoría", sorted(categorias.keys()))
-    subcategoria = st.selectbox("Subcategoría", categorias[categoria])
     metodo = st.selectbox("Método de pago", ["Efectivo", "Tarjeta", "Transferencia", "Otro"])
     responsable = st.text_input("Responsable")
     descripcion = st.text_area("Descripción")
