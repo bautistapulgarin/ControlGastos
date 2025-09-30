@@ -1,6 +1,6 @@
 import streamlit as st
 from supabase import create_client
-from datetime import datetime
+from datetime import date
 
 # ----------------------------
 # Configuración Supabase
@@ -10,7 +10,7 @@ SUPABASE_KEY = st.secrets["supabase"]["key"]
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ----------------------------
-# Diccionario Categoría -> Subcategorías
+# Diccionario de categorías y subcategorías
 # ----------------------------
 categorias = {
     "Alimentación": [
@@ -31,79 +31,124 @@ categorias = {
         "Peajes / parqueaderos",
         "Estacionamiento mensual / mensualidad de transporte",
         "Bicicleta / patineta / movilidad eléctrica"
+    ],
+    "Servicios": [
+        "Luz / electricidad",
+        "Agua / acueducto",
+        "Gas",
+        "Internet / datos móviles",
+        "Telefonía fija / celular",
+        "TV por cable / streaming",
+        "Suscripciones digitales (Netflix, Spotify, software, apps)",
+        "Limpieza / aseo (servicios domésticos)",
+        "Seguridad / alarma / vigilancia"
+    ],
+    "Salud": [
+        "Medicamentos",
+        "Consulta médica general",
+        "Especialistas (odontología, dermatología, oftalmología…)",
+        "Exámenes médicos / laboratorio",
+        "Gimnasio / actividades físicas",
+        "Seguros de salud",
+        "Terapias (psicológica, fisioterapia, etc.)",
+        "Equipos o productos de salud (mascarillas, termómetros, vitaminas)"
+    ],
+    "Educación": [
+        "Matrícula / colegiatura",
+        "Libros / material didáctico",
+        "Cursos / talleres / seminarios",
+        "Software educativo / apps educativas"
+    ],
+    "Ocio / Entretenimiento": [
+        "Cine / teatro / conciertos",
+        "Deportes / hobbies",
+        "Salidas / viajes / excursiones",
+        "Videojuegos / apps de entretenimiento",
+        "Cafés / bares / restaurantes sociales",
+        "Libros, revistas, periódicos",
+        "Suscripciones de ocio (streaming de películas, música, podcasts)"
+    ],
+    "Ahorro / Inversión": [
+        "Cuenta de ahorro",
+        "Fondo de inversión",
+        "Criptomonedas / acciones / bolsa",
+        "Caja de emergencia",
+        "Planes de retiro / pensión",
+        "Ahorro para metas específicas (vacaciones, educación, compra de vehículo)",
+        "Seguros de vida / seguros patrimoniales"
+    ],
+    "Otros": [
+        "Mascotas: comida, veterinario, juguetes, cuidado",
+        "Regalos / donaciones: cumpleaños, navidad, eventos sociales",
+        "Hogar: muebles, electrodomésticos, mantenimiento, reparaciones",
+        "Ropa y accesorios: ropa diaria, calzado, accesorios, lavandería",
+        "Tecnología / gadgets: celulares, computadoras, software, gadgets",
+        "Eventos / celebraciones: fiestas, reuniones familiares, bodas"
+    ],
+    "Compras (Supermercado / Hogar)": [
+        "Alimentos básicos",
+        "Carnes y proteínas",
+        "Frutas y verduras",
+        "Lácteos y derivados",
+        "Bebidas",
+        "Snacks y golosinas",
+        "Panadería y repostería",
+        "Congelados y preparados",
+        "Higiene y cuidado personal",
+        "Limpieza y hogar",
+        "Mascotas",
+        "Otros / misceláneos"
     ]
-    # ... agrega las demás categorías como antes
 }
 
 # ----------------------------
-# Inicializar session_state para categoría/subcategoría
+# Interfaz Streamlit
 # ----------------------------
-if "Categoria" not in st.session_state:
-    st.session_state.Categoria = ""
-if "Subcategoria" not in st.session_state:
-    st.session_state.Subcategoria = ""
+st.title("Registro de Gastos - Supabase 🚀")
+
+with st.form("form_registro"):
+    fecha = st.date_input("Fecha", value=date.today())
+    tipo = st.selectbox("Tipo", ["Ingreso", "Egreso"])
+    monto = st.number_input("Monto", min_value=0.0, step=0.01)
+    categoria = st.selectbox("Categoría", sorted(categorias.keys()))
+    subcategoria = st.selectbox("Subcategoría", categorias[categoria])
+    metodo = st.selectbox("Método de pago", ["Efectivo", "Tarjeta", "Transferencia", "Otro"])
+    responsable = st.text_input("Responsable")
+    descripcion = st.text_area("Descripción")
+    cuenta = st.text_input("Cuenta")
+    estado = st.selectbox("Estado", ["Pendiente", "Pagado", "Cancelado"])
+
+    if st.form_submit_button("Guardar en Supabase"):
+        data = {
+            "Fecha": str(fecha),
+            "Tipo": tipo,
+            "Monto": monto,
+            "Categoria": categoria,
+            "Subcategoria": subcategoria,
+            "Metodo": metodo,
+            "Responsable": responsable,
+            "Descripcion": descripcion,
+            "Cuenta": cuenta,
+            "Estado": estado
+        }
+        try:
+            response = supabase.table("personas").insert([data]).execute()
+            if response.data:
+                st.success("✅ Registro guardado en Supabase")
+            else:
+                st.error(f"❌ Error al insertar en Supabase: {response}")
+        except Exception as e:
+            st.error(f"❌ Error inesperado: {e}")
 
 # ----------------------------
-# Función principal
+# Mostrar registros existentes
 # ----------------------------
-st.title("Registro de Gastos con Subcategorías Dependientes 🚀")
-
-# Selección de categoría
-Categoria = st.selectbox("Categoría", list(categorias.keys()), index=0)
-if Categoria != st.session_state.Categoria:
-    st.session_state.Categoria = Categoria
-    st.session_state.Subcategoria = categorias[Categoria][0]  # reinicia subcategoría al cambiar categoría
-
-# Selección de subcategoría
-Subcategoria = st.selectbox(
-    "Subcategoría",
-    categorias[st.session_state.Categoria],
-    index=categorias[st.session_state.Categoria].index(st.session_state.Subcategoria)
-)
-st.session_state.Subcategoria = Subcategoria
-
-# Otros campos
-Fecha = st.date_input("Fecha", value=datetime.today())
-Tipo = st.selectbox("Tipo", ["Ingreso", "Gasto"])
-Monto = st.number_input("Monto", min_value=0.0, step=0.01)
-CategoriaMercado = st.text_input("Categoría de Mercado")
-Metodo = st.selectbox("Método", ["Efectivo", "Transferencia", "Tarjeta", "Otro"])
-Responsable = st.text_input("Responsable")
-Descripcion = st.text_area("Descripción")
-Cuenta = st.text_input("Cuenta")
-Estado = st.selectbox("Estado", ["Pendiente", "Aprobado", "Rechazado"])
-
-# Botón de guardar
-if st.button("Guardar en Supabase"):
-    data = {
-        "Fecha": Fecha.isoformat(),
-        "Tipo": Tipo,
-        "Monto": Monto,
-        "Categoria": st.session_state.Categoria,
-        "Subcategoria": st.session_state.Subcategoria,
-        "CategoriaMercado": CategoriaMercado,
-        "Metodo": Metodo,
-        "Responsable": Responsable,
-        "Descripcion": Descripcion,
-        "Cuenta": Cuenta,
-        "Estado": Estado
-    }
-    try:
-        response = supabase.table("personas").insert([data]).execute()
-        if response.data:
-            st.success("✅ Registro guardado en Supabase")
-        else:
-            st.error(f"❌ Error al guardar: {response}")
-    except Exception as e:
-        st.error(f"❌ Error inesperado: {e}")
-
-# Botón para leer registros
 if st.button("Leer registros"):
     try:
         response = supabase.table("personas").select("*").execute()
         if response.data:
-            st.write(response.data)
+            st.dataframe(response.data)
         else:
-            st.warning("⚠️ No hay registros todavía.")
+            st.warning("No hay datos todavía.")
     except Exception as e:
-        st.error(f"❌ Error al leer: {e}")
+        st.error(f"❌ Error al leer registros: {e}")
