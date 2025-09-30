@@ -17,31 +17,31 @@ st.title("Registro de Gastos y Datos de Personas 🚀")
 
 # Formulario para ingresar datos
 with st.form("form_registro"):
-    fecha = st.date_input("Fecha", value=datetime.today())
-    tipo = st.selectbox("Tipo", ["Ingreso", "Gasto"])
-    monto = st.number_input("Monto", min_value=0.0, step=0.01)
-    categoria = st.text_input("Categoría")
-    subcategoria = st.text_input("Subcategoría")
-    metodo = st.selectbox("Método", ["Efectivo", "Transferencia", "Tarjeta", "Otro"])
-    responsable = st.text_input("Responsable")
-    descripcion = st.text_area("Descripción")
-    cuenta = st.text_input("Cuenta")
-    estado = st.selectbox("Estado", ["Pendiente", "Aprobado", "Rechazado"])
+    Fecha = st.date_input("Fecha", value=datetime.today())
+    Tipo = st.selectbox("Tipo", ["Ingreso", "Gasto"])
+    Monto = st.number_input("Monto", min_value=0.0, step=0.01)
+    Categoria = st.text_input("Categoría")
+    Subcategoria = st.text_input("Subcategoría")
+    Metodo = st.selectbox("Método", ["Efectivo", "Transferencia", "Tarjeta", "Otro"])
+    Responsable = st.text_input("Responsable")
+    Descripcion = st.text_area("Descripción")
+    Cuenta = st.text_input("Cuenta")
+    Estado = st.selectbox("Estado", ["Pendiente", "Aprobado", "Rechazado"])
 
     submitted = st.form_submit_button("Guardar en Supabase")
 
     if submitted:
         data = {
-            "fecha": fecha.isoformat(),
-            "tipo": tipo,
-            "monto": monto,
-            "categoria": categoria,
-            "subcategoria": subcategoria,
-            "metodo": metodo,
-            "responsable": responsable,
-            "descripcion": descripcion,
-            "cuenta": cuenta,
-            "estado": estado
+            "Fecha": Fecha.isoformat(),
+            "Tipo": Tipo,
+            "Monto": Monto,
+            "Categoria": Categoria,
+            "Subcategoria": Subcategoria,
+            "Metodo": Metodo,
+            "Responsable": Responsable,
+            "Descripcion": Descripcion,
+            "Cuenta": Cuenta,
+            "Estado": Estado
         }
         try:
             response = supabase.table("personas").insert([data]).execute()
